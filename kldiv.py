@@ -119,4 +119,4 @@ for term in fg_dict:
     #print(term,kldivI,kldivP,kldiv)
 
 print("\n\nTop terms:")
-print_top_n_terms(kldiv_per_term,100)
+print_top_n_terms(kldiv_per_term,10)
