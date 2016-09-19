@@ -32,7 +32,7 @@ def get_all_ngrams (text,maxn) :
     i=0
     terms = dict()
     for word in words :
-        if word not in stoplist:
+        if word not in stoplist and len(word) > 1 and '@' not in word:
             if word in terms :
                 terms[word] += 1
             else :
