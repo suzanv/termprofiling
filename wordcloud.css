@@ -1,0 +1,216 @@
+#word-cloud {
+ width: 1100px;
+ height: 600px;
+ text-align: center;
+ margin: 0 auto;
+ padding: 2em 0;
+ font: 140% 'Yanone Kaffeesatz', Arial, sans-serif;
+}
+
+#word-cloud span {
+ 
+}
+
+#word-cloud .word-1 {
+ top: 1em;
+ left: 1.5em;
+ font-size: 100px;
+ color: #626262;
+}
+
+#word-cloud .word-2 {
+ top: 0;
+ left: 1em;
+ font-size: 80px;
+ color: #906060;
+}
+
+#word-cloud .word-3 {
+ top: 1em;
+ left: 1.5em;
+ font-size: 60px;
+ color: #c5c5c5;
+}
+
+#word-cloud .word-4 {
+ top: 1em;
+ left: 0;
+ font-size: 40px;
+ color: #511c1c;
+}
+
+#word-cloud .word-5 {
+ top: 1.5em;
+ right: -0.3em;
+ color: #666;
+ font-size: 70px;
+}
+
+#word-cloud .word-6 {
+ bottom: 0;
+ right: 1em;
+ color: #5e0000;
+ font-size: 120px;
+}
+
+#word-cloud .word-7 {
+ bottom: 0.6em;
+ left: 0;
+ color: #6e6e6e;
+ font-size: 90px;
+}
+
+#word-cloud .word-8 {
+ bottom: 0;
+ right: 1em;
+ color: #5e0000;
+ font-size: 60px;
+}
+
+#word-cloud .word-8 {
+ bottom: 0;
+ right: 1em;
+ color: #5e0000;
+ font-size: 60px;
+}
+
+#word-cloud .word-9 {
+ bottom: 0;
+ right: 1em;
+ color: #5e0000;
+ font-size: 55px;
+}
+
+#word-cloud .word-10 {
+ bottom: 0;
+ right: 1em;
+ color: #5e0000;
+ font-size: 55px;
+}
+
+#word-cloud .word-11 {
+ bottom: 0;
+ right: 1em;
+ color: #5e0000;
+ font-size: 50px;
+}
+
+#word-cloud .word-12 {
+ bottom: 0;
+ right: 1em;
+ color: #5e0000;
+ font-size: 50px;
+}
+
+#word-cloud .word-13 {
+ bottom: 0;
+ right: 1em;
+ color: #5e0000;
+ font-size: 45px;
+}
+
+#word-cloud .word-14 {
+ bottom: 0;
+ right: 1em;
+ color: #5e0000;
+ font-size: 45px;
+}
+
+#word-cloud .word-15 {
+ bottom: 0;
+ right: 1em;
+ color: #5e0000;
+ font-size: 45px;
+}
+
+#word-cloud .word-16 {
+ bottom: 0;
+ right: 1em;
+ color: #5e0000;
+ font-size: 40px;
+}
+
+#word-cloud .word-17 {
+ bottom: 0;
+ right: 1em;
+ color: #5e0000;
+ font-size: 40px;
+}
+
+#word-cloud .word-18 {
+ bottom: 0;
+ right: 1em;
+ color: #5e0000;
+ font-size: 40px;
+}
+
+#word-cloud .word-19 {
+ bottom: 0;
+ right: 1em;
+ color: #5e0000;
+ font-size: 40px;
+}
+
+#word-cloud .word-20 {
+ bottom: 0;
+ right: 1em;
+ color: #5e0000;
+ font-size: 40px;
+}
+
+#word-cloud .word-21 {
+ bottom: 0;
+ right: 1em;
+ color: #5e0000;
+ font-size: 40px;
+}
+
+#word-cloud .word-22 {
+ bottom: 0;
+ right: 1em;
+ color: #5e0000;
+ font-size: 35px;
+}
+
+#word-cloud .word-23 {
+ bottom: 0;
+ right: 1em;
+ color: #5e0000;
+ font-size: 35px;
+}
+
+#word-cloud .word-24 {
+ bottom: 0;
+ right: 1em;
+ color: #5e0000;
+ font-size: 35px;
+}
+
+#word-cloud .word-25 {
+ bottom: 0;
+ right: 1em;
+ color: #5e0000;
+ font-size: 35px;
+}
+
+#word-cloud .word-26 {
+ bottom: 0;
+ right: 1em;
+ color: #5e0000;
+ font-size: 30px;
+}
+v
+
+#word-cloud .word-27 {
+ bottom: 0;
+ right: 1em;
+ color: #5e0000;
+ font-size: 30px;
+}
+
+#word-cloud .word-28 {
+ bottom: 0;
+ right: 1em;
+ color: #5e0000;
+ font-size: 30px;
+}
