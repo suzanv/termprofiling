@@ -1,5 +1,6 @@
 # coding=utf-8
 # python kldiv.py foreground.txt background.txt termcloud.html
+# python kldiv.py foreground.txt directory_with_COCA_term_lists/ termcloud.html
 
 
 import re
