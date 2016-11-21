@@ -5,6 +5,8 @@ Implementation of the algorithm in:
 
 ```
 python kldiv.py foreground.txt background.txt termcloud.html
+
+python kldiv.py foreground.txt directory_with_COCA_term_lists/ termcloud.html
 ```
 
 * The first argument is the foreground corpus in plain text. In the case of pdf input, use https://github.com/euske/pdfminer for the conversion. Adapt if needed for json, xml, csv or any other formats, and multi-file instead of single-file. 
