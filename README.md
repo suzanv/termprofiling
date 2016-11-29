@@ -11,7 +11,7 @@ python kldiv.py foreground.txt wiki_freqlist.txt.gz termcloud.html
 ```
 
 * The first argument is the foreground corpus in plain text. In the case of pdf input, use https://github.com/euske/pdfminer for the conversion. Adapt if needed for json, xml, csv or any other formats, and multi-file instead of single-file. 
-* The second argument is the background corpus in plain text, or the file wiki_freqlist.txt.gz, an n-gram frequency list extracted from a small portion of the English Wikipedia (3.5 M words)
+* The second argument is the background corpus in plain text, or the file `wiki_freqlist.txt.gz`, an n-gram frequency list extracted from a small portion of the English Wikipedia (3.5 M words)
 * The third argument is an HTML output file with the termcloud 
 
 Scores all unigrams, bigrams and trigrams in the foreground text for (a) their informativeness relative to the background corpus and (b) their 'phraseness': the frequency of the n-gram compared to the frequencies of the separate unigrams.
