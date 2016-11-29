@@ -1,6 +1,6 @@
 # coding=utf-8
 # python kldiv.py foreground.txt background.txt termcloud.html
-# python kldiv.py foreground.txt directory_with_COCA_term_lists/ termcloud.html
+# python kldiv.py foreground.txt wiki_freqlist.txt.gz termcloud.html
 
 
 import re
@@ -8,9 +8,10 @@ import sys
 import math
 import operator
 import os
+import gzip
 
 gamma = 0.8 # parameter for weight of the phraseness component
-number_of_terms = 30
+number_of_terms = 15
 
 foreground_file = sys.argv[1]
 background_file = sys.argv[2]
@@ -84,27 +85,23 @@ def read_text_in_dict(text):
         total_term_count += freq_dict[key]
     return freq_dict, total_term_count
 
-def read_columns_in_dict(existing_dict,total_term_count,filename,columns_with_term,column_with_freq):
-    with open(filename,'r') as wl:
-        for l in wl:
-            columns = l.rstrip().split("\t")
-            if re.match("[0-9]+",columns[column_with_freq]):
-                termfields = []
-                for c in columns_with_term:
-                    termfields.append(columns[c])
-                t = " ".join(termfields)
-                freq = int(columns[column_with_freq])
-                existing_dict[t] = freq
-                total_term_count += freq
-    wl.close()
+def read_columns_in_dict(existing_dict,total_term_count,file,column_with_term,column_with_freq):
+    for l in file:
+        #print (l)
+        columns = l.rstrip().split("\t")
+        if re.match("[0-9]+",columns[column_with_freq]):
+            t = " ".join(columns[column_with_term])
+            freq = int(columns[column_with_freq])
+            existing_dict[t] = freq
+            total_term_count += freq
     return existing_dict, total_term_count
 
 def print_top_n_terms(score_dict,n):
     sorted_terms = sorted(score_dict.items(),key=operator.itemgetter(1),reverse=True)
     i=0
-    for (term,score) in sorted_terms:
+    for (t,score) in sorted_terms:
         i += 1
-        print(term,score)
+        print(t,score)
         if i==n:
             break
 
@@ -143,17 +140,25 @@ with open(foreground_file,'r') as fg:
 print("Read background corpus",background_file)
 bg_dict = dict()
 bg_term_count = 0
-if os.path.isdir(background_file):
-    # bgcorpus in directory with frequency files
-    bg_dict,bg_term_count = read_columns_in_dict(bg_dict,bg_term_count,background_file+"/w1_.txt",[1],3)
-    bg_dict,bg_term_count = read_columns_in_dict(bg_dict,bg_term_count,background_file+"/w2_.txt",[1,2],0)
-    bg_dict,bg_term_count = read_columns_in_dict(bg_dict,bg_term_count,background_file+"/w3_.txt",[1,2,3],0)
+
+if ".gz" in background_file:
+    print ("corpus is gzipped file")
+    bg=gzip.open(background_file,'rt',encoding = "ISO-8859-1")
+else:
+    bg = open(background_file,'r')
+
+first_line = bg.readline().rstrip()
+#print (first_line)
+if re.match("^[a-zA-Z0-9' &-]+\t[0-9]+$",first_line):
+    # is freqlist
+    print ("corpus is freqlist")
+    bg_dict,bg_term_count = read_columns_in_dict(bg_dict,bg_term_count,bg,0,1)
 
 else:
     # bgcorpus in text file
-    with open(background_file,'r') as bg:
-        bgtext=bg.read()
-        bg_dict, bg_term_count = read_text_in_dict(bgtext)
+    print ("corpus is running text")
+    bgtext=bg.read()
+    bg_dict, bg_term_count = read_text_in_dict(bgtext)
 
 print("Calculate kldiv per term in foregound corpus")
 kldiv_per_term = dict()
