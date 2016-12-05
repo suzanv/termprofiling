@@ -21,7 +21,7 @@ def tokenize(t):
     text = t.lower()
     text = re.sub("\n"," ",text)
     text = re.sub(r'<[^>]+>',"",text) # remove all html markup
-    text = re.sub('[^a-zèéeêëûüùôöòóœøîïíàáâäæãå&@#A-Z0-9- \']', "", text)
+    text = re.sub('[^a-zèéeêëėęûüùúūôöòóõœøîïíīįìàáâäæãåçćč&@#A-ZÇĆČÉÈÊËĒĘÛÜÙÚŪÔÖÒÓŒØŌÕÎÏÍĪĮÌ0-9- \']', "", text)
     wrds = text.split()
     return wrds
 
@@ -116,8 +116,8 @@ def print_wordcloud(outfile,freq_dict,nr_of_words_in_cloud):
         rank += 1
         if rank> nr_of_words_in_cloud:
             break
-        if re.match("[a-z][a-z][a-z]+",word):
-            top_words[word] = rank
+        #if re.match("[a-z][a-z][a-z]+",word):
+        top_words[word] = rank
 
     outfile.write('<div id="word-cloud">\n')
 
@@ -196,6 +196,7 @@ print_top_n_terms(kldiv_per_term,number_of_terms)
 htmlfile = open(htmlpath,'w')
 htmlfile.write("<html>\n"
                "<head>\n"
+               "<meta http-equiv=\"content-type\" content=\"text/html; charset=utf-8\" />\n"
                "<link href='http://fonts.googleapis.com/css?family=Yanone+Kaffeesatz:regular,bold' rel='stylesheet' type='text/css' />\n"
                "<link href='wordcloud.css' rel='stylesheet' type='text/css' />\n"
                "</head>\n"
