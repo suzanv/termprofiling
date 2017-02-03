@@ -19,4 +19,8 @@ Unigrams that are stopwords are not taken into account, as well as bigrams of wh
 
 The script uses an external stopword list. The provided stoplist.txt is my own English stoplist.
 
+If you use this code, please refer to this paper:
+> Suzan Verberne, Maya Sappelli, Djoerd Hiemstra, Wessel Kraaij (2016). Evaluation and analysis of term scoring methods for term extraction. Information Retrieval, Springer. doi:10.1007/s10791-016-9286-2
+
 Source of the wordcloud css: http://onwebdev.blogspot.com/2011/05/css-word-cloud.html
+
