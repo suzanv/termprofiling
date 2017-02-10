@@ -24,3 +24,6 @@ If you use this code, please refer to this paper:
 
 Source of the wordcloud css: http://onwebdev.blogspot.com/2011/05/css-word-cloud.html
 
+### License
+
+See the [LICENSE](LICENSE.md) file for license rights and limitations (GNU-GPL v3.0).
