@@ -7,15 +7,9 @@ import re
 import sys
 import math
 import operator
-import os
 import gzip
 
-gamma = 0.8 # parameter for weight of the phraseness component
-number_of_terms = 15
 
-foreground_file = sys.argv[1]
-background_file = sys.argv[2]
-htmlpath = sys.argv[3]
 
 def tokenize(t):
     text = t.lower()
@@ -49,7 +43,7 @@ def get_all_ngrams (text,maxn) :
         if maxn >= 2 :
             if i< len(words)-1 :
                 if words[i] not in stoplist and words[i+1] not in stoplist and words[i+1] != words[i]:
-                    bigram = words[i]+ " " +words[i+1]
+                    bigram = str(words[i])+ " " +str(words[i+1])
                     if bigram in terms :
                         terms[bigram] += 1
                     else :
@@ -59,7 +53,7 @@ def get_all_ngrams (text,maxn) :
                     if i < len(words)-2 :
                         if not words[i] in stoplist and not words[i+2] in stoplist and words[i+1] != words[i]:
                             # middle word can be a stopword
-                            trigram = words[i]+ " " +words[i+1]+ " " +words[i+2]
+                            trigram = str(words[i])+ " " +str(words[i+1])+ " " +str(words[i+2])
                             if trigram in terms :
                                 terms[trigram] += 1
                             else :
@@ -96,7 +90,36 @@ def read_columns_in_dict(existing_dict,total_term_count,file,column_with_term,co
             total_term_count += freq
     return existing_dict, total_term_count
 
-def print_top_n_terms(score_dict,n):
+def compute_kldiv_for_all_terms (fg_dict,bg_dict,fg_term_count,bg_term_count,gamma):
+    kldiv_per_term = dict()
+    for term in fg_dict:
+        fg_freq = fg_dict[term]
+
+        # kldivI is kldiv for informativeness: relative to bg corpus freqs
+        bg_freq = 1
+        if term in bg_dict:
+            bg_freq = bg_dict[term]
+        relfreq_fg = float(fg_freq)/float(fg_term_count)
+        relfreq_bg = float(bg_freq)/float(bg_term_count)
+
+        kldivI = relfreq_fg*math.log(relfreq_fg/relfreq_bg)
+
+        # kldivP is kldiv for phraseness: relative to unigram freqs
+        unigrams = term.split(" ")
+        relfreq_unigrams = 1.0
+        for unigram in unigrams:
+            if unigram in fg_dict:
+                # stopwords are not in the dict
+                u_freq = fg_dict[unigram]
+                u_relfreq = float(u_freq)/float(fg_term_count)
+                relfreq_unigrams *= u_relfreq
+        kldivP = relfreq_fg*math.log(relfreq_fg/relfreq_unigrams)
+        kldiv = (1-gamma)*kldivI+gamma*kldivP
+        kldiv_per_term[term] = kldiv
+        #print (term,kldiv)
+    return kldiv_per_term
+
+def print_top_n_terms(score_dict,n=15):
     sorted_terms = sorted(score_dict.items(),key=operator.itemgetter(1),reverse=True)
     i=0
     for (t,score) in sorted_terms:
@@ -105,9 +128,7 @@ def print_top_n_terms(score_dict,n):
         if i==n:
             break
 
-
-
-def print_wordcloud(outfile,freq_dict,nr_of_words_in_cloud):
+def print_wordcloud(outfile,freq_dict,nr_of_words_in_cloud=15):
     sorted_wordfreq = sorted(freq_dict.items(), key=operator.itemgetter(1),reverse=True)
     top_words = dict()
 
@@ -129,83 +150,78 @@ def print_wordcloud(outfile,freq_dict,nr_of_words_in_cloud):
 
     outfile.write('</div><br><br><br><br>\n')
 
-#fg_dict, bg_dict = dict(),dict()
-#fg_term_count, bg_term_count = 0,0
+def print_wordcloud_to_html(htmlpath,kldiv_per_term,number_of_terms=15):
 
-print("Read foreground corpus",foreground_file)
-with open(foreground_file,'r') as fg:
-    fgtext=fg.read()
-    fg_dict, fg_term_count = read_text_in_dict(fgtext)
+    htmlfile = open(htmlpath,'w')
+    htmlfile.write("<html>\n"
+                   "<head>\n"
+                   "<meta http-equiv=\"content-type\" content=\"text/html; charset=utf-8\" />\n"
+                   "<link href='http://fonts.googleapis.com/css?family=Yanone+Kaffeesatz:regular,bold' rel='stylesheet' type='text/css' />\n"
+                   "<link href='wordcloud.css' rel='stylesheet' type='text/css' />\n"
+                   "</head>\n"
+                   "<body>\n")
+    print_wordcloud(htmlfile,kldiv_per_term,number_of_terms)
 
-print("Read background corpus",background_file)
-bg_dict = dict()
-bg_term_count = 0
+    htmlfile.write('<br><br>\n')
 
-if ".gz" in background_file:
-    print ("corpus is gzipped file")
-    bg=gzip.open(background_file,'rt',encoding = "ISO-8859-1")
-else:
-    bg = open(background_file,'r')
+    htmlfile.write("</body>\n"
+                   "</html>\n")
 
-first_line = bg.readline().rstrip()
-#print (first_line)
-if re.match("^[a-zA-Z0-9' &-]+\t[0-9]+$",first_line):
-    # is freqlist
-    print ("corpus is freqlist")
-    bg_dict,bg_term_count = read_columns_in_dict(bg_dict,bg_term_count,bg,0,1)
+    htmlfile.close()
 
-else:
-    # bgcorpus in text file
-    print ("corpus is running text")
-    bgtext=bg.read()
-    bg_dict, bg_term_count = read_text_in_dict(bgtext)
+def process_corpora_and_print_terms(foreground_file,background_file,htmlpath,gamma,number_of_terms=15):
 
-print("Calculate kldiv per term in foregound corpus")
-kldiv_per_term = dict()
-for term in fg_dict:
-    fg_freq = fg_dict[term]
+    print("Read foreground corpus",foreground_file)
 
-    # kldivI is kldiv for informativeness: relative to bg corpus freqs
-    bg_freq = 1
-    if term in bg_dict:
-        bg_freq = bg_dict[term]
-    relfreq_fg = float(fg_freq)/float(fg_term_count)
-    relfreq_bg = float(bg_freq)/float(bg_term_count)
+    with open(foreground_file,'r') as fg:
+        fgtext=fg.read()
+        fg_dict, fg_term_count = read_text_in_dict(fgtext)
 
-    kldivI = relfreq_fg*math.log(relfreq_fg/relfreq_bg)
+    print("Read background corpus",background_file)
+    bg_dict = dict()
+    bg_term_count = 0
 
-    # kldivP is kldiv for phraseness: relative to unigram freqs
-    unigrams = term.split(" ")
-    relfreq_unigrams = 1.0
-    for unigram in unigrams:
-        if unigram in fg_dict:
-            # stopwords are not in the dict
-            u_freq = fg_dict[unigram]
-            u_relfreq = float(u_freq)/float(fg_term_count)
-            relfreq_unigrams *= u_relfreq
-    kldivP = relfreq_fg*math.log(relfreq_fg/relfreq_unigrams)
-    kldiv = (1-gamma)*kldivI+gamma*kldivP
-    kldiv_per_term[term] = kldiv
-    #print(term,kldivI,kldivP,kldiv)
+    if ".gz" in background_file:
+        print ("corpus is gzipped file")
+        bg=gzip.open(background_file,'rt',encoding = "ISO-8859-1")
+    else:
+        bg = open(background_file,'r')
 
-print("\n\nTop terms:")
-print_top_n_terms(kldiv_per_term,number_of_terms)
+    first_line = bg.readline().rstrip()
+    #print (first_line)
+    if re.match("^[a-zA-Z0-9' &-]+\t[0-9]+$",first_line):
+        # is freqlist
+        print ("corpus is freqlist")
+        bg_dict,bg_term_count = read_columns_in_dict(bg_dict,bg_term_count,bg,0,1)
+
+    else:
+        # bgcorpus in text file
+        print ("corpus is running text")
+        bgtext=bg.read()
+        bg_dict, bg_term_count = read_text_in_dict(bgtext)
+
+    print("Calculate kldiv per term in foregound corpus")
+    kldiv_per_term = compute_kldiv_for_all_terms(fg_dict,bg_dict,fg_term_count,bg_term_count,gamma)
 
 
+    print("\n\nTop terms:")
+    print_top_n_terms(kldiv_per_term,number_of_terms)
+    print_wordcloud_to_html(htmlpath,kldiv_per_term,number_of_terms)
 
-htmlfile = open(htmlpath,'w')
-htmlfile.write("<html>\n"
-               "<head>\n"
-               "<meta http-equiv=\"content-type\" content=\"text/html; charset=utf-8\" />\n"
-               "<link href='http://fonts.googleapis.com/css?family=Yanone+Kaffeesatz:regular,bold' rel='stylesheet' type='text/css' />\n"
-               "<link href='wordcloud.css' rel='stylesheet' type='text/css' />\n"
-               "</head>\n"
-               "<body>\n")
-print_wordcloud(htmlfile,kldiv_per_term,number_of_terms)
 
-htmlfile.write('<br><br>\n')
+if __name__ == "__main__":
 
-htmlfile.write("</body>\n"
-               "</html>\n")
+    gamma = 0.8 # parameter for weight of the phraseness component
+    number_of_terms = 15
 
-htmlfile.close()
+    foreground_file = sys.argv[1]
+    background_file = sys.argv[2]
+    htmlpath = sys.argv[3]
+
+    process_corpora_and_print_terms(foreground_file,background_file,htmlpath,gamma)
+
+
+
+
+
+
