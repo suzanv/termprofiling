@@ -90,7 +90,7 @@ def read_columns_in_dict(existing_dict,total_term_count,file,column_with_term,co
             total_term_count += freq
     return existing_dict, total_term_count
 
-def compute_kldiv_for_all_terms (fg_dict,bg_dict,fg_term_count,bg_term_count,gamma):
+def compute_kldiv_for_all_terms (fg_dict,bg_dict,fg_term_count,bg_term_count,gamma=0.5):
     kldiv_per_term = dict()
     for term in fg_dict:
         fg_freq = fg_dict[term]
@@ -150,7 +150,7 @@ def print_wordcloud(outfile,freq_dict,nr_of_words_in_cloud=15):
 
     outfile.write('</div><br><br><br><br>\n')
 
-def print_wordcloud_to_html(htmlpath,kldiv_per_term,number_of_terms=15):
+def print_wordcloud_to_html(kldiv_per_term,number_of_terms=15,htmlpath="termcloud.html"):
 
     htmlfile = open(htmlpath,'w')
     htmlfile.write("<html>\n"
@@ -169,7 +169,7 @@ def print_wordcloud_to_html(htmlpath,kldiv_per_term,number_of_terms=15):
 
     htmlfile.close()
 
-def process_corpora_and_print_terms(foreground_file,background_file,htmlpath,gamma,number_of_terms=15):
+def process_corpora_and_print_terms(foreground_file,background_file="wiki_freqlist.txt.gz",htmlpath="termcloud.html",gamma=0.5,number_of_terms=15):
 
     print("Read foreground corpus",foreground_file)
 
@@ -206,7 +206,7 @@ def process_corpora_and_print_terms(foreground_file,background_file,htmlpath,gam
 
     print("\n\nTop terms:")
     print_top_n_terms(kldiv_per_term,number_of_terms)
-    print_wordcloud_to_html(htmlpath,kldiv_per_term,number_of_terms)
+    print_wordcloud_to_html(kldiv_per_term,number_of_terms,htmlpath)
 
 
 if __name__ == "__main__":
@@ -218,7 +218,7 @@ if __name__ == "__main__":
     background_file = sys.argv[2]
     htmlpath = sys.argv[3]
 
-    process_corpora_and_print_terms(foreground_file,background_file,htmlpath,gamma)
+    process_corpora_and_print_terms(foreground_file,background_file,htmlpath,gamma,number_of_terms)
 
 
 

@@ -10,9 +10,29 @@ python kldiv.py foreground.txt background.txt termcloud.html
 python kldiv.py foreground.txt wiki_freqlist.txt.gz termcloud.html
 ```
 
+Or use it as a package from an external script:
+```
+import termprofiling.kldiv as kldiv
+kldiv.process_corpora_and_print_terms(foreground_file,background_file,htmlpath,gamma,number_of_terms)
+```
+
 * The first argument is the foreground corpus in plain text. In the case of pdf input, use https://github.com/euske/pdfminer for the conversion. Adapt if needed for json, xml, csv or any other formats, and multi-file instead of single-file. 
-* The second argument is the background corpus in plain text, or the file `wiki_freqlist.txt.gz`, an n-gram frequency list extracted from a small portion of the English Wikipedia (3.5 M words)
-* The third argument is an HTML output file with the termcloud 
+* The second argument (optional when used as package) is the background corpus in plain text, or the file `wiki_freqlist.txt.gz` (default), an n-gram frequency list extracted from a small portion of the English Wikipedia (3.5 M words)
+* The third argument (optional when used as package) is an HTML output file with the termcloud 
+* When used as package, the optional fourth argument is the value of gamma (between 0.0 and 1.0; default 0.5. For English texts, we suggest to use gamma=0.8)
+* When used as package, the optional fifth argument is the number of terms returned (default 15)
+
+```
+import termprofiling.kldiv as kldiv
+kldiv.process_corpora_and_print_terms(my_corpus_file,"wiki_freqlist.txt.gz","my_termcloud.html","0.8",15)
+```
+
+or, using all defaults:
+
+```
+import termprofiling.kldiv as kldiv
+kldiv.process_corpora_and_print_terms(my_corpus_file)
+```
 
 Scores all unigrams, bigrams and trigrams in the foreground text for (a) their informativeness relative to the background corpus and (b) their 'phraseness': the frequency of the n-gram compared to the frequencies of the separate unigrams.
 Unigrams that are stopwords are not taken into account, as well as bigrams of which one of the two is a stopword, trigrams that start of end with a stopword and bigrams or trigrams with a word repetition.
