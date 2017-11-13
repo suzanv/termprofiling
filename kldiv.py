@@ -156,7 +156,8 @@ def print_wordcloud_to_html(kldiv_per_term,number_of_terms=15,htmlpath="termclou
     htmlfile.write("<html>\n"
                    "<head>\n"
                    "<meta http-equiv=\"content-type\" content=\"text/html; charset=utf-8\" />\n"
-                   "<link href='http://fonts.googleapis.com/css?family=Yanone+Kaffeesatz:regular,bold' rel='stylesheet' type='text/css' />\n"
+                   "<link href='http://fonts.googleapis.com/css?family=Yanone+Kaffeesatz:regular,bold' rel='stylesheet'"
+                   " type='text/css' />\n"
                    "<link href='wordcloud.css' rel='stylesheet' type='text/css' />\n"
                    "</head>\n"
                    "<body>\n")
@@ -169,7 +170,8 @@ def print_wordcloud_to_html(kldiv_per_term,number_of_terms=15,htmlpath="termclou
 
     htmlfile.close()
 
-def process_corpora_and_print_terms(foreground_file,background_file="wiki_freqlist.txt.gz",htmlpath="termcloud.html",gamma=0.5,number_of_terms=15):
+def process_corpora_and_print_terms(foreground_file,background_file="wiki_freqlist.txt.gz",htmlpath="termcloud.html",
+                                    gamma=0.5,number_of_terms=15):
 
     print("Read foreground corpus",foreground_file)
 
