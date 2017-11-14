@@ -2,7 +2,6 @@
 # python kldiv.py foreground.txt background.txt termcloud.html
 # python kldiv.py foreground.txt wiki_freqlist.txt.gz termcloud.html
 
-# http://python.omics.wiki/file-operations/file-commands/get-module-path
 
 import re
 import os
