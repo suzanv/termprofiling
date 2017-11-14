@@ -2,8 +2,10 @@
 # python kldiv.py foreground.txt background.txt termcloud.html
 # python kldiv.py foreground.txt wiki_freqlist.txt.gz termcloud.html
 
+# http://python.omics.wiki/file-operations/file-commands/get-module-path
 
 import re
+import os
 import sys
 import math
 import operator
@@ -22,7 +24,8 @@ def tokenize(t):
 
 stoplist = set()
 print("Read stopword list")
-with open(r'stoplist.txt') as stoplist_file:
+module_dir = os.path.dirname(os.path.realpath(__file__))
+with open(module_dir+'/stoplist.txt') as stoplist_file:
     for line in stoplist_file:
         stopword = line.rstrip()
         stoplist.add(stopword)
@@ -170,7 +173,7 @@ def print_wordcloud_to_html(kldiv_per_term,number_of_terms=15,htmlpath="termclou
 
     htmlfile.close()
 
-def process_corpora_and_print_terms(foreground_file,background_file="wiki_freqlist.txt.gz",htmlpath="termcloud.html",
+def process_corpora_and_print_terms(foreground_file,background_file=module_dir+"/wiki_freqlist.txt.gz",htmlpath="termcloud.html",
                                     gamma=0.5,number_of_terms=15):
 
     print("Read foreground corpus",foreground_file)
