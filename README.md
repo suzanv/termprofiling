@@ -5,7 +5,7 @@ Implementation of the algorithm in:
 
 ## Usage
 
-### stand-alone
+### Stand-alone
 
 ```
 python kldiv.py foreground.txt background.txt termcloud.html
