@@ -5,6 +5,8 @@ Implementation of the algorithm in:
 
 ## Usage
 
+### stand-alone
+
 ```
 python kldiv.py foreground.txt background.txt termcloud.html
 ```
@@ -12,7 +14,8 @@ python kldiv.py foreground.txt background.txt termcloud.html
 python kldiv.py foreground.txt wiki_freqlist.txt.gz termcloud.html
 ```
 
-Or use it as a package from an external script:
+### As a package from an external script
+
 ```
 import termprofiling.kldiv as kldiv
 kldiv.process_corpora_and_print_terms(foreground_file,background_file,htmlpath,gamma,number_of_terms)
