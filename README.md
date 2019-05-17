@@ -26,7 +26,7 @@ python kldiv.py foreground wiki_freqlist.txt.gz
 
 ```
 import termprofiling.kldiv as kldiv
-kldiv.process_corpora_and_print_terms(foreground_file,background_file,htmlpath,gamma,number_of_terms)
+kldiv.process_corpora_and_print_terms(foreground_file,background_file,htmlpath,gamma,maxn,number_of_terms)
 ```
 
 * The first argument is the foreground corpus in plain text or a directory of texts. In the case of pdf input, use https://github.com/euske/pdfminer for the conversion. Adapt if needed for json, xml, csv or any other formats, and multi-file instead of single-file. 
@@ -38,17 +38,17 @@ kldiv.process_corpora_and_print_terms(foreground_file,background_file,htmlpath,g
 
 ```
 import termprofiling.kldiv as kldiv
-kldiv.process_corpora_and_print_terms(my_corpus_file,"wiki_freqlist.txt.gz","my_termcloud.html","0.8",15)
+kldiv.process_corpora_and_print_terms(my_corpus_directory,"wiki_freqlist.txt.gz","my_termcloud.html",0.8,4,15)
 ```
 
 or, using all defaults:
 
 ```
 import termprofiling.kldiv as kldiv
-kldiv.process_corpora_and_print_terms(my_corpus_file)
+kldiv.process_corpora_and_print_terms(my_corpus_directory)
 ```
 
-If you only get single words, and you would like to see multi-word terms, try increasing gammma:
+If you only get single words, and you would like to see multi-word terms, try increasing gamma:
 
 ```
 import termprofiling.kldiv as kldiv
