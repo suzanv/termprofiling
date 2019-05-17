@@ -1,6 +1,8 @@
 # coding=utf-8
 # python kldiv.py foreground.txt background.txt termcloud.html
 # python kldiv.py foreground.txt wiki_freqlist.txt.gz termcloud.html
+# python kldiv.py foreground.txt termcloud.html
+# python kldiv.py foreground.txt wiki_freqlist.txt.gz
 
 
 import re
@@ -9,14 +11,14 @@ import sys
 import math
 import operator
 import gzip
-
+from collections import defaultdict
 
 
 def tokenize(t):
     text = t.lower()
     text = re.sub("\n"," ",text)
     text = re.sub(r'<[^>]+>',"",text) # remove all html markup
-    text = re.sub('[^a-zèéeêëėęûüùúūôöòóõœøîïíīįìàáâäæãåçćč&@#A-ZÇĆČÉÈÊËĒĘÛÜÙÚŪÔÖÒÓŒØŌÕÎÏÍĪĮÌ0-9- \']', "", text)
+    text = re.sub('[^a-zèéeêëėęûüùúūôöòóõœøîïíīįìàáâäæãåçćč&@#A-ZÇĆČÉÈÊËĒĘÛÜÙÚŪÔÖÒÓŒØŌÕÎÏÍĪĮÌ0-9-_ \']', "", text)
     wrds = text.split()
     return wrds
 
@@ -32,35 +34,14 @@ with open(module_dir+'/stoplist.txt') as stoplist_file:
 
 def get_all_ngrams (text,maxn) :
     words = tokenize(text)
-    i=0
-    terms = dict()
-    for word in words :
-        if word == "classication":
-            word = "classification"
-        if word not in stoplist and len(word) > 1 and '@' not in word:
-            if word in terms :
-                terms[word] += 1
-            else :
-                terms[word] = 1
-        if maxn >= 2 :
-            if i< len(words)-1 :
-                if words[i] not in stoplist and words[i+1] not in stoplist and words[i+1] != words[i]:
-                    bigram = str(words[i])+ " " +str(words[i+1])
-                    if bigram in terms :
-                        terms[bigram] += 1
-                    else :
-                        terms[bigram] = 1
-
-                if maxn >= 3 :
-                    if i < len(words)-2 :
-                        if not words[i] in stoplist and not words[i+2] in stoplist and words[i+1] != words[i]:
-                            # middle word can be a stopword
-                            trigram = str(words[i])+ " " +str(words[i+1])+ " " +str(words[i+2])
-                            if trigram in terms :
-                                terms[trigram] += 1
-                            else :
-                                terms[trigram] = 1
-        i += 1
+    terms = defaultdict(int)
+    for i in range (0,len(words)):
+        for j in range (1,maxn+1):
+            ngram = words[i:i+j]
+            if ngram[0] not in stoplist and ngram[-1] not in stoplist:
+                # the first and last word of the ngram may not be stopwords
+                term = " ".join(ngram)
+                terms[term] += 1
     return terms
 
 
@@ -73,13 +54,14 @@ def filter_ngrams(freq_dict):
 
 
 
-def read_text_in_dict(text):
-    freq_dict = get_all_ngrams(text,3)
+def read_text_in_dict(text,maxn=3):
+    freq_dict = get_all_ngrams(text,maxn)
     freq_dict = filter_ngrams(freq_dict)
     total_term_count = 0
     for key in freq_dict:
         total_term_count += freq_dict[key]
     return freq_dict, total_term_count
+
 
 def read_columns_in_dict(existing_dict,total_term_count,file,column_with_term,column_with_freq):
     for l in file:
@@ -96,15 +78,18 @@ def compute_kldiv_for_all_terms (fg_dict,bg_dict,fg_term_count,bg_term_count,gam
     kldiv_per_term = dict()
     for term in fg_dict:
         fg_freq = fg_dict[term]
+        relfreq_fg = float(fg_freq) / float(fg_term_count)
 
         # kldivI is kldiv for informativeness: relative to bg corpus freqs
-        bg_freq = 1
-        if term in bg_dict:
-            bg_freq = bg_dict[term]
-        relfreq_fg = float(fg_freq)/float(fg_term_count)
-        relfreq_bg = float(bg_freq)/float(bg_term_count)
+        kldivI = 0
+        if bg_term_count > 0:
 
-        kldivI = relfreq_fg*math.log(relfreq_fg/relfreq_bg)
+            bg_freq = 1
+            if term in bg_dict:
+                bg_freq = bg_dict[term]
+            relfreq_bg = float(bg_freq)/float(bg_term_count)
+
+            kldivI = relfreq_fg*math.log(relfreq_fg/relfreq_bg)
 
         # kldivP is kldiv for phraseness: relative to unigram freqs
         unigrams = term.split(" ")
@@ -172,37 +157,51 @@ def print_wordcloud_to_html(kldiv_per_term,number_of_terms=15,htmlpath="termclou
 
     htmlfile.close()
 
-def process_corpora_and_print_terms(foreground_file,background_file=module_dir+"/wiki_freqlist.txt.gz",htmlpath="termcloud.html",
-                                    gamma=0.5,number_of_terms=15):
+def process_corpora_and_print_terms(foreground,background_file=module_dir+"/wiki_freqlist.txt.gz",htmlpath="termcloud.html",
+                                    gamma=0.5,maxn=3,number_of_terms=15):
 
-    print("Read foreground corpus",foreground_file)
 
-    with open(foreground_file,'r') as fg:
-        fgtext=fg.read()
-        fg_dict, fg_term_count = read_text_in_dict(fgtext)
+    print("Read foreground corpus",foreground)
+    foreground_files = list()
+    if os.path.isdir(foreground):
+        for foreground_file in os.listdir(foreground):
+            foreground_files.append(foreground+foreground_file)
+    else:
+        foreground_files.append(foreground)
 
-    print("Read background corpus",background_file)
+    fgtext = ""
+    for foreground_file in foreground_files:
+        with open(foreground_file,'r') as fg:
+            fgtext += fg.read()
+
+    fg_dict, fg_term_count = read_text_in_dict(fgtext,maxn)
+
     bg_dict = dict()
     bg_term_count = 0
+    if background_file is not None:
 
-    if ".gz" in background_file:
-        print ("corpus is gzipped file")
-        bg=gzip.open(background_file,'rt',encoding = "ISO-8859-1")
-    else:
-        bg = open(background_file,'r')
+        print("Read background corpus",background_file)
+        bg_dict = dict()
+        bg_term_count = 0
 
-    first_line = bg.readline().rstrip()
-    #print (first_line)
-    if re.match("^[a-zA-Z0-9' &-]+\t[0-9]+$",first_line):
-        # is freqlist
-        print ("corpus is freqlist")
-        bg_dict,bg_term_count = read_columns_in_dict(bg_dict,bg_term_count,bg,0,1)
+        if ".gz" in background_file:
+            print ("corpus is gzipped file")
+            bg=gzip.open(background_file,'rt',encoding = "ISO-8859-1")
+        else:
+            bg = open(background_file,'r')
 
-    else:
-        # bgcorpus in text file
-        print ("corpus is running text")
-        bgtext=bg.read()
-        bg_dict, bg_term_count = read_text_in_dict(bgtext)
+        first_line = bg.readline().rstrip()
+        #print (first_line)
+        if re.match("^[a-zA-Z0-9' &-]+\t[0-9]+$",first_line):
+            # is freqlist
+            print ("corpus is freqlist")
+            bg_dict,bg_term_count = read_columns_in_dict(bg_dict,bg_term_count,bg,0,1)
+
+        else:
+            # bgcorpus in text file
+            print ("corpus is running text")
+            bgtext=bg.read()
+            bg_dict, bg_term_count = read_text_in_dict(bgtext)
 
     print("Calculate kldiv per term in foregound corpus")
     kldiv_per_term = compute_kldiv_for_all_terms(fg_dict,bg_dict,fg_term_count,bg_term_count,gamma)
@@ -213,16 +212,34 @@ def process_corpora_and_print_terms(foreground_file,background_file=module_dir+"
     print_wordcloud_to_html(kldiv_per_term,number_of_terms,htmlpath)
 
 
+
 if __name__ == "__main__":
 
-    gamma = 0.8 # parameter for weight of the phraseness component
-    number_of_terms = 15
+    gamma = 0.5 # parameter for weight of the phraseness component
+    maxn = 4 # maximum ngram length
+    number_of_terms = 20
+    print("gamma:",gamma)
+    print("maxn:",maxn)
+
+    background_file = None
 
     foreground_file = sys.argv[1]
-    background_file = sys.argv[2]
-    htmlpath = sys.argv[3]
+    if len(sys.argv) == 4:
+        background_file = sys.argv[2]
+        htmlpath = sys.argv[3]
+    elif "html" in sys.argv[2]:
+        htmlpath = sys.argv[2]
+        print ("No background corpus; only compute phraseness component")
+    else:
+        background_file = sys.argv[2]
+        htmlpath = "wordcloud.html"
 
-    process_corpora_and_print_terms(foreground_file,background_file,htmlpath,gamma,number_of_terms)
+    if gamma == 1.0:
+        print("Gamma = 1.0; only compute the phraseness component")
+        background_file = None
+
+    process_corpora_and_print_terms(foreground_file,background_file,htmlpath,gamma,maxn,number_of_terms)
+    print("\nWordcloud in",htmlpath)
 
 
 

@@ -135,8 +135,6 @@ nobody
 none
 noone
 nor
-not
-nothing
 now
 nowhere
 of
