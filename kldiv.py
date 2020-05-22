@@ -49,7 +49,7 @@ def get_all_ngrams (text,maxn) :
 def filter_ngrams(freq_dict):
     filtered_freq_dict = dict()
     for ngram in freq_dict:
-        if re.match("[a-zA-Z]",ngram):
+        if re.match("[a-zA-Z]",ngram) and len(ngram) >2:
             filtered_freq_dict[ngram] = freq_dict[ngram]
     return filtered_freq_dict
 
@@ -112,7 +112,7 @@ def print_top_n_terms(score_dict,n=15):
     i=0
     for (t,score) in sorted_terms:
         i += 1
-        print(t,score)
+        print(t)
         if i==n:
             break
 
@@ -227,7 +227,7 @@ if __name__ == "__main__":
 
     gamma = 0.5 # parameter for weight of the phraseness component
     maxn = 5 # maximum ngram length
-    number_of_terms = 40
+    number_of_terms = 20
     print("gamma:",gamma)
     print("maxn:",maxn)
 
