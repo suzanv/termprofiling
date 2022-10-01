@@ -27,7 +27,7 @@ def tokenize(t):
 stoplist = set()
 print("Read stopword list")
 module_dir = os.path.dirname(os.path.realpath(__file__))
-with open(module_dir+'/stoplist_dutch.txt') as stoplist_file:
+with open(module_dir+'/stoplist.txt') as stoplist_file:
     for line in stoplist_file:
         stopword = line.rstrip()
         stoplist.add(stopword)
@@ -46,18 +46,19 @@ def get_all_ngrams (text,maxn) :
     return terms
 
 
-def filter_ngrams(freq_dict):
+def filter_ngrams(freq_dict,min_freq):
     filtered_freq_dict = dict()
     for ngram in freq_dict:
         if re.match("[a-zA-Z]",ngram) and len(ngram) >2:
-            filtered_freq_dict[ngram] = freq_dict[ngram]
+            if freq_dict[ngram] >= min_freq:
+                filtered_freq_dict[ngram] = freq_dict[ngram]
     return filtered_freq_dict
 
 
 
-def read_text_in_dict(text,maxn=3):
+def read_text_in_dict(text,maxn=3,min_freq=5):
     freq_dict = get_all_ngrams(text,maxn)
-    freq_dict = filter_ngrams(freq_dict)
+    freq_dict = filter_ngrams(freq_dict,min_freq)
     total_term_count = 0
     for key in freq_dict:
         total_term_count += freq_dict[key]
@@ -159,27 +160,25 @@ def print_wordcloud_to_html(kldiv_per_term,number_of_terms=15,htmlpath="termclou
     htmlfile.close()
 
 def process_corpora_and_print_terms(foreground,background_file=module_dir+"/wiki_freqlist.txt.gz",htmlpath="termcloud.html",
-                                    gamma=0.5,maxn=3,number_of_terms=20):
+                                    gamma=0.5,maxn=3,number_of_terms=20,min_freq=5):
 
     fgtext = ""
 
-    if isinstance(foreground, str):
-        fgtext = foreground
 
+    print("Read foreground corpus",foreground)
+    foreground_files = list()
+    if os.path.isdir(foreground):
+
+        for foreground_file in os.listdir(foreground):
+            foreground_files.append(foreground+foreground_file)
     else:
-        print("Read foreground corpus",foreground)
-        foreground_files = list()
-        if os.path.isdir(foreground):
-            for foreground_file in os.listdir(foreground):
-                foreground_files.append(foreground+foreground_file)
-        else:
-            foreground_files.append(foreground)
+        foreground_files.append(foreground)
 
-        for foreground_file in foreground_files:
-            with open(foreground_file,'r') as fg:
-                fgtext += fg.read()
+    for foreground_file in foreground_files:
+        with open(foreground_file,'r') as fg:
+            fgtext += fg.read()
 
-    fg_dict, fg_term_count = read_text_in_dict(fgtext,maxn)
+    fg_dict, fg_term_count = read_text_in_dict(fgtext,maxn,min_freq)
 
     bg_dict = dict()
     bg_term_count = 0
@@ -187,7 +186,7 @@ def process_corpora_and_print_terms(foreground,background_file=module_dir+"/wiki
 
         if isinstance(background_file, str):
             bgtext = background_file
-            bg_dict, bg_term_count = read_text_in_dict(bgtext)
+            bg_dict, bg_term_count = read_text_in_dict(bgtext,maxn)
 
         else:
             print("Read background corpus",background_file)
@@ -211,7 +210,7 @@ def process_corpora_and_print_terms(foreground,background_file=module_dir+"/wiki
                 # bgcorpus in text file
                 print ("corpus is running text")
                 bgtext=bg.read()
-                bg_dict, bg_term_count = read_text_in_dict(bgtext)
+                bg_dict, bg_term_count = read_text_in_dict(bgtext,maxn)
 
     #print("Calculate kldiv per term in foregound corpus")
     kldiv_per_term = compute_kldiv_for_all_terms(fg_dict,bg_dict,fg_term_count,bg_term_count,gamma)
@@ -225,11 +224,13 @@ def process_corpora_and_print_terms(foreground,background_file=module_dir+"/wiki
 
 if __name__ == "__main__":
 
-    gamma = 0.5 # parameter for weight of the phraseness component
-    maxn = 5 # maximum ngram length
+    gamma = 0.2 # parameter for weight of the phraseness component
+    maxn = 3 # maximum ngram length
     number_of_terms = 20
+    min_freq = 5 # minimum frequency for terms to occur
     print("gamma:",gamma)
     print("maxn:",maxn)
+    print("min freq:", min_freq)
 
     background_file = None
 
@@ -248,7 +249,7 @@ if __name__ == "__main__":
         print("Gamma = 1.0; only compute the phraseness component")
         background_file = None
 
-    process_corpora_and_print_terms(foreground_file,background_file,htmlpath,gamma,maxn,number_of_terms)
+    process_corpora_and_print_terms(foreground_file,background_file,htmlpath,gamma,maxn,number_of_terms,min_freq)
     print("\nWordcloud in",htmlpath)
 
 
